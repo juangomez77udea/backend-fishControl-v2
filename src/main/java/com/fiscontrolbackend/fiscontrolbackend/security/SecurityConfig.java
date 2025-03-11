@@ -47,7 +47,12 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/login", "/api/createUser").permitAll() // Permitir estas rutas
+                        .requestMatchers(
+                                "/api/login",
+                                "/api/createUser",
+                                "/api/supplies",
+                                "api/supplies/{id}"
+                        ).permitAll() // Permitir estas rutas
                         .anyRequest().authenticated()
                 )
                 .addFilter(jwtAuthenticationFilter) // Agregar filtro de autenticación
