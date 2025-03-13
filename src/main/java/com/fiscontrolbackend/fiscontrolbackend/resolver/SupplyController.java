@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,6 +32,8 @@ public class SupplyController {
         supply.setSuppliesQuantity(supplyDTO.getSuppliesQuantity());
         supply.setSuppliesPrice(supplyDTO.getSuppliesPrice());
         supply.setSuppliesDate(supplyDTO.getSuppliesDate());
+        supply.setType(supplyDTO.getType());
+        supply.setStage(supplyDTO.getStage());
 
         SupplyEntity createdSupply = supplyDetailsService.createSupply(supply);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdSupply);

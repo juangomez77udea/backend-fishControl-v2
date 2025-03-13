@@ -41,4 +41,3 @@ public class UserEntity {
     private Set<RoleEntity> roles;
 
 }
-

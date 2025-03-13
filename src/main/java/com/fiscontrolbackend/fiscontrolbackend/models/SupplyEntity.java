@@ -1,3 +1,4 @@
+
 package com.fiscontrolbackend.fiscontrolbackend.models;
 
 import jakarta.persistence.*;
@@ -19,6 +20,7 @@ public class SupplyEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @NotBlank
     private String suppliesName;
 
@@ -34,4 +36,19 @@ public class SupplyEntity {
     @NotNull
     private LocalDate suppliesDate;
 
+    // tipo de insumo
+    @Enumerated(EnumType.STRING)
+    @NotNull
+    private ESupplyType type;
+
+    // etapa de producción (opcional)
+    private String stage;
+
+    // Validación para la presentación del alimento
+    public void setPresentation(String presentation) {
+        if (this.type == ESupplyType.FOOD && !("40kg".equals(presentation) || !("20kg".equals(presentation)))) {
+            throw new IllegalArgumentException("La presentación del alimento debe ser '40kg' o '20kg'.");
+        }
+        this.presentation = presentation;
+    }
 }
