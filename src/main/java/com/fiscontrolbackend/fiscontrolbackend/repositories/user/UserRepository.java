@@ -1,6 +1,6 @@
-package com.fiscontrolbackend.fiscontrolbackend.repositories;
+package com.fiscontrolbackend.fiscontrolbackend.repositories.user;
 
-import com.fiscontrolbackend.fiscontrolbackend.models.UserEntity;
+import com.fiscontrolbackend.fiscontrolbackend.models.user.UserEntity;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;

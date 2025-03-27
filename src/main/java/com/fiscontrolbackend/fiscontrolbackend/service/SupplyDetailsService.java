@@ -1,7 +1,7 @@
 package com.fiscontrolbackend.fiscontrolbackend.service;
 
-import com.fiscontrolbackend.fiscontrolbackend.models.ESupplyType;
-import com.fiscontrolbackend.fiscontrolbackend.models.SupplyEntity;
+import com.fiscontrolbackend.fiscontrolbackend.models.main.ESupplyType;
+import com.fiscontrolbackend.fiscontrolbackend.models.main.SupplyEntity;
 
 import java.util.List;
 import java.util.Map;

@@ -1,5 +1,5 @@
 
-package com.fiscontrolbackend.fiscontrolbackend.models;
+package com.fiscontrolbackend.fiscontrolbackend.models.main;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;

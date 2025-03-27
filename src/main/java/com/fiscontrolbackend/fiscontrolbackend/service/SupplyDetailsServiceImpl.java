@@ -1,8 +1,8 @@
 package com.fiscontrolbackend.fiscontrolbackend.service;
 
-import com.fiscontrolbackend.fiscontrolbackend.models.ESupplyType;
-import com.fiscontrolbackend.fiscontrolbackend.models.SupplyEntity;
-import com.fiscontrolbackend.fiscontrolbackend.repositories.SupplyRepository;
+import com.fiscontrolbackend.fiscontrolbackend.models.main.ESupplyType;
+import com.fiscontrolbackend.fiscontrolbackend.models.main.SupplyEntity;
+import com.fiscontrolbackend.fiscontrolbackend.repositories.main.SupplyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

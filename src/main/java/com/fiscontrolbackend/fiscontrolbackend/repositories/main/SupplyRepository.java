@@ -1,7 +1,7 @@
-package com.fiscontrolbackend.fiscontrolbackend.repositories;
+package com.fiscontrolbackend.fiscontrolbackend.repositories.main;
 
-import com.fiscontrolbackend.fiscontrolbackend.models.ESupplyType;
-import com.fiscontrolbackend.fiscontrolbackend.models.SupplyEntity;
+import com.fiscontrolbackend.fiscontrolbackend.models.main.ESupplyType;
+import com.fiscontrolbackend.fiscontrolbackend.models.main.SupplyEntity;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;

@@ -1,4 +1,4 @@
-package com.fiscontrolbackend.fiscontrolbackend.models;
+package com.fiscontrolbackend.fiscontrolbackend.models.user;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -28,16 +28,19 @@ public class UserEntity {
     @NotBlank
     @Size(max = 80)
     private String email;
+
     @NotBlank
     @Size(max = 30)
     private String username;
+
     @NotBlank
     private String password;
+
     @NotNull
     private Boolean enabled;
 
     @ManyToMany(fetch = FetchType.EAGER, targetEntity = RoleEntity.class, cascade = CascadeType.PERSIST)
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<RoleEntity> roles;
-
 }
+

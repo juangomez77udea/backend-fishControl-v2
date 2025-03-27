@@ -1,6 +1,6 @@
 package com.fiscontrolbackend.fiscontrolbackend.request;
 
-import com.fiscontrolbackend.fiscontrolbackend.models.ESupplyType;
+import com.fiscontrolbackend.fiscontrolbackend.models.main.ESupplyType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

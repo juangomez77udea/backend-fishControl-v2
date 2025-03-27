@@ -1,9 +1,9 @@
 package com.fiscontrolbackend.fiscontrolbackend;
 
-import com.fiscontrolbackend.fiscontrolbackend.models.ERole;
-import com.fiscontrolbackend.fiscontrolbackend.models.RoleEntity;
-import com.fiscontrolbackend.fiscontrolbackend.models.UserEntity;
-import com.fiscontrolbackend.fiscontrolbackend.repositories.UserRepository;
+import com.fiscontrolbackend.fiscontrolbackend.models.user.ERole;
+import com.fiscontrolbackend.fiscontrolbackend.models.user.RoleEntity;
+import com.fiscontrolbackend.fiscontrolbackend.models.user.UserEntity;
+import com.fiscontrolbackend.fiscontrolbackend.repositories.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;

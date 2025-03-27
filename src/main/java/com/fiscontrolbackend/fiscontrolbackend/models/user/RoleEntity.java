@@ -1,4 +1,4 @@
-package com.fiscontrolbackend.fiscontrolbackend.models;
+package com.fiscontrolbackend.fiscontrolbackend.models.user;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

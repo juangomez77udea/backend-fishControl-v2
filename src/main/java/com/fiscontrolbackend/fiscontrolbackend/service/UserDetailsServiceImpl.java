@@ -1,7 +1,7 @@
 package com.fiscontrolbackend.fiscontrolbackend.service;
 
-import com.fiscontrolbackend.fiscontrolbackend.models.UserEntity;
-import com.fiscontrolbackend.fiscontrolbackend.repositories.UserRepository;
+import com.fiscontrolbackend.fiscontrolbackend.models.user.UserEntity;
+import com.fiscontrolbackend.fiscontrolbackend.repositories.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.GrantedAuthority;

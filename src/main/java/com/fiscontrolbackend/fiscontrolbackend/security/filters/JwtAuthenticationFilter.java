@@ -1,7 +1,7 @@
 package com.fiscontrolbackend.fiscontrolbackend.security.filters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fiscontrolbackend.fiscontrolbackend.models.UserEntity;
+import com.fiscontrolbackend.fiscontrolbackend.models.user.UserEntity;
 import com.fiscontrolbackend.fiscontrolbackend.security.jwt.JwtUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

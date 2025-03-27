@@ -1,6 +1,6 @@
 package com.fiscontrolbackend.fiscontrolbackend.resolver;
 
-import com.fiscontrolbackend.fiscontrolbackend.models.SupplyEntity;
+import com.fiscontrolbackend.fiscontrolbackend.models.main.SupplyEntity;
 import com.fiscontrolbackend.fiscontrolbackend.request.CreateSupplyDTO;
 import com.fiscontrolbackend.fiscontrolbackend.service.SupplyDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;

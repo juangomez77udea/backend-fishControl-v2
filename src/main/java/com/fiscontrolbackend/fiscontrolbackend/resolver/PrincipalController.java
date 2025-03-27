@@ -1,9 +1,9 @@
 package com.fiscontrolbackend.fiscontrolbackend.resolver;
 
-import com.fiscontrolbackend.fiscontrolbackend.models.ERole;
-import com.fiscontrolbackend.fiscontrolbackend.models.RoleEntity;
-import com.fiscontrolbackend.fiscontrolbackend.models.UserEntity;
-import com.fiscontrolbackend.fiscontrolbackend.repositories.UserRepository;
+import com.fiscontrolbackend.fiscontrolbackend.models.user.ERole;
+import com.fiscontrolbackend.fiscontrolbackend.models.user.RoleEntity;
+import com.fiscontrolbackend.fiscontrolbackend.models.user.UserEntity;
+import com.fiscontrolbackend.fiscontrolbackend.repositories.user.UserRepository;
 import com.fiscontrolbackend.fiscontrolbackend.request.CreateUserDTO;
 import com.fiscontrolbackend.fiscontrolbackend.request.LoginRequest;
 import com.fiscontrolbackend.fiscontrolbackend.security.jwt.JwtUtils;
