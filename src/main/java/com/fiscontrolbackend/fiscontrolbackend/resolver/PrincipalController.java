@@ -8,12 +8,15 @@ import com.fiscontrolbackend.fiscontrolbackend.request.CreateUserDTO;
 import com.fiscontrolbackend.fiscontrolbackend.request.LoginRequest;
 import com.fiscontrolbackend.fiscontrolbackend.security.jwt.JwtUtils;
 import com.fiscontrolbackend.fiscontrolbackend.service.UserDetailsServiceImpl;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,6 +34,7 @@ import java.util.stream.Collectors;
 @RestController
 @CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/api")
+@Slf4j
 public class PrincipalController {
 
     @Autowired
@@ -49,28 +53,48 @@ public class PrincipalController {
     private UserDetailsServiceImpl userDetailsService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-        UserEntity user = userRepository.findByUsername(loginRequest.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
+        try {
+            UserEntity user = userRepository.findByUsername(loginRequest.getUsername())
+                    .orElseThrow(() -> {
+                        log.error("Intento de login fallido: Usuario no encontrado - Username: {} - IP: {}",
+                                loginRequest.getUsername(), request.getRemoteAddr());
+                        return new UsernameNotFoundException("Usuario no encontrado");
+                    });
 
-        if (!user.getEnabled()) { // 🔹 Verificar si el usuario está activo
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("El usuario está deshabilitado.");
+            if (!user.getEnabled()) {
+                log.error("Intento de login fallido: Usuario deshabilitado - Username: {} - IP: {}",
+                        loginRequest.getUsername(), request.getRemoteAddr());
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("El usuario está deshabilitado.");
+            }
+
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            // Obtener los detalles del usuario para incluir los roles en el token
+            UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
+            String jwt = jwtUtils.generateAccessToken(userDetails);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("token", jwt);
+            response.put("username", authentication.getName());
+
+            log.info("Login exitoso - Username: {} - IP: {}", loginRequest.getUsername(), request.getRemoteAddr());
+            return ResponseEntity.ok(response);
+
+        } catch (BadCredentialsException e) {
+            log.error("Intento de login fallido: Credenciales inválidas - Username: {} - IP: {}",
+                    loginRequest.getUsername(), request.getRemoteAddr());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales inválidas");
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        } catch (Exception e) {
+            log.error("Error en login - Username: {} - IP: {} - Error: {}",
+                    loginRequest.getUsername(), request.getRemoteAddr(), e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error de autenticación");
         }
-
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        // Obtener los detalles del usuario para incluir los roles en el token
-        UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
-        String jwt = jwtUtils.generateAccessToken(userDetails);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("token", jwt);
-        response.put("username", authentication.getName());
-
-        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/createUser")
