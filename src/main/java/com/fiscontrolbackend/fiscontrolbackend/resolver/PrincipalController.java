@@ -7,19 +7,23 @@ import com.fiscontrolbackend.fiscontrolbackend.repositories.user.UserRepository;
 import com.fiscontrolbackend.fiscontrolbackend.request.CreateUserDTO;
 import com.fiscontrolbackend.fiscontrolbackend.request.LoginRequest;
 import com.fiscontrolbackend.fiscontrolbackend.security.jwt.JwtUtils;
+import com.fiscontrolbackend.fiscontrolbackend.service.UserDetailsServiceImpl;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -41,6 +45,9 @@ public class PrincipalController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private UserDetailsServiceImpl userDetailsService;
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         UserEntity user = userRepository.findByUsername(loginRequest.getUsername())
@@ -54,7 +61,10 @@ public class PrincipalController {
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtUtils.generateAccessToken(authentication.getName());
+
+        // Obtener los detalles del usuario para incluir los roles en el token
+        UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
+        String jwt = jwtUtils.generateAccessToken(userDetails);
 
         Map<String, Object> response = new HashMap<>();
         response.put("token", jwt);
@@ -63,8 +73,8 @@ public class PrincipalController {
         return ResponseEntity.ok(response);
     }
 
-
     @PostMapping("/createUser")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createUser(@Valid @RequestBody CreateUserDTO createUserDTO) {
 
         if (userRepository.findByUsername(createUserDTO.getUsername()).isPresent()) {
@@ -89,7 +99,9 @@ public class PrincipalController {
         return ResponseEntity.ok("Usuario creado correctamente");
     }
 
+    // Método para eliminar un usuario por ID - Solo para administradores
     @DeleteMapping("/deleteUser/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         if (!userRepository.existsById(id)) {
             return ResponseEntity.badRequest().body("El usuario no existe");
@@ -97,4 +109,65 @@ public class PrincipalController {
         userRepository.deleteById(id);
         return ResponseEntity.ok("Usuario eliminado con éxito");
     }
+
+    // Método para eliminar un usuario por nombre de usuario - Solo para administradores
+    @DeleteMapping("/deleteUserByUsername/{username}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> deleteUserByUsername(@PathVariable String username) {
+        UserEntity user = userRepository.findByUsername(username)
+                .orElse(null);
+
+        if (user == null) {
+            return ResponseEntity.badRequest().body("El usuario no existe");
+        }
+
+        userRepository.delete(user);
+        return ResponseEntity.ok("Usuario '" + username + "' eliminado con éxito");
+    }
+
+    // Método para desactivar un usuario (eliminación lógica) - Solo para administradores
+    @PatchMapping("/disableUser/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> disableUser(@PathVariable Long id) {
+        UserEntity user = userRepository.findById(id)
+                .orElse(null);
+
+        if (user == null) {
+            return ResponseEntity.badRequest().body("El usuario no existe");
+        }
+
+        user.setEnabled(false);
+        userRepository.save(user);
+        return ResponseEntity.ok("Usuario desactivado con éxito");
+    }
+
+    // Método para obtener todos los usuarios - Solo para administradores
+    @GetMapping("/users")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<UserEntity>> getAllUsers() {
+        List<UserEntity> users = (List<UserEntity>) userRepository.findAll();
+
+        // Ocultar las contraseñas en la respuesta
+        users.forEach(user -> user.setPassword("[PROTECTED]"));
+
+        return ResponseEntity.ok(users);
+    }
+
+    // Método para obtener un usuario por ID - Solo para administradores o el propio usuario
+    @GetMapping("/users/{id}")
+    @PreAuthorize("hasRole('ADMIN') or @userSecurity.isCurrentUser(#id)")
+    public ResponseEntity<?> getUserById(@PathVariable Long id) {
+        UserEntity user = userRepository.findById(id)
+                .orElse(null);
+
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Ocultar la contraseña en la respuesta
+        user.setPassword("[PROTECTED]");
+
+        return ResponseEntity.ok(user);
+    }
 }
+
