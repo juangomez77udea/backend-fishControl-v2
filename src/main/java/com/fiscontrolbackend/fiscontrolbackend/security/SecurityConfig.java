@@ -3,6 +3,7 @@ package com.fiscontrolbackend.fiscontrolbackend.security;
 import com.fiscontrolbackend.fiscontrolbackend.security.filters.JwtAuthenticationFilter;
 import com.fiscontrolbackend.fiscontrolbackend.security.filters.JwtAuthorizationFilter;
 import com.fiscontrolbackend.fiscontrolbackend.security.jwt.JwtUtils;
+import com.fiscontrolbackend.fiscontrolbackend.service.RefreshTokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,9 +41,12 @@ public class SecurityConfig {
     @Autowired
     AuthenticationEntryPointImpl authenticationEntryPoint;
 
+    @Autowired
+    RefreshTokenService refreshTokenService;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
-        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtUtils, authenticationManager);
+        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtUtils, authenticationManager, refreshTokenService);
         jwtAuthenticationFilter.setFilterProcessesUrl("/api/login");
 
         return http
@@ -56,7 +60,9 @@ public class SecurityConfig {
                                 "/api/login",
                                 "/api/createUser",
                                 "/api/supplies",
-                                "/api/supplies/{id}"
+                                "/api/supplies/{id}",
+                                "/api/auth/refreshtoken",
+                                "/api/auth/logout"
                         ).permitAll() // Permitir estas rutas
                         .anyRequest().authenticated()
                 )

@@ -1,8 +1,10 @@
 package com.fiscontrolbackend.fiscontrolbackend.security.filters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fiscontrolbackend.fiscontrolbackend.models.user.RefreshTokenEntity;
 import com.fiscontrolbackend.fiscontrolbackend.models.user.UserEntity;
 import com.fiscontrolbackend.fiscontrolbackend.security.jwt.JwtUtils;
+import com.fiscontrolbackend.fiscontrolbackend.service.RefreshTokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,9 +31,11 @@ import java.util.stream.Collectors;
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final JwtUtils jwtUtils;
+    private final RefreshTokenService refreshTokenService;
 
-    public JwtAuthenticationFilter(JwtUtils jwtUtils, AuthenticationManager authenticationManager) {
+    public JwtAuthenticationFilter(JwtUtils jwtUtils, AuthenticationManager authenticationManager, RefreshTokenService refreshTokenService) {
         this.jwtUtils = jwtUtils;
+        this.refreshTokenService = refreshTokenService;
         setAuthenticationManager(authenticationManager);
     }
 
@@ -70,12 +74,16 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         // Generar el token JWT
         String token = jwtUtils.generateAccessToken(user);
 
+        // Generar refresh token
+        RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(user.getUsername());
+
         // Agregar el token al encabezado de la respuesta
         response.addHeader("Authorization", "Bearer " + token);
 
         // Crear la respuesta JSON
         Map<String, Object> httpResponse = new HashMap<>();
         httpResponse.put("token", token);
+        httpResponse.put("refreshToken", refreshToken.getToken());
         httpResponse.put("message", "Autenticación correcta");
         httpResponse.put("username", user.getUsername());
         httpResponse.put("roles", roles); // Agregar los roles a la respuesta
