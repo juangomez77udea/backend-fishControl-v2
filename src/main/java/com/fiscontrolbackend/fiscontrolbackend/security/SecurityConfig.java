@@ -56,11 +56,11 @@ public class SecurityConfig {
                                 "/api/login",
                                 "/api/createUser",
                                 "/api/supplies",
-                                "api/supplies/{id}"
+                                "/api/supplies/{id}"
                         ).permitAll() // Permitir estas rutas
                         .anyRequest().authenticated()
                 )
-                .addFilter(jwtAuthenticationFilter) // Agregar filtro de autenticación
+                .addFilter(jwtAuthenticationFilter)
                 .addFilterBefore(authorizationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

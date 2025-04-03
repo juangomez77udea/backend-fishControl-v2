@@ -23,15 +23,22 @@ public class AuthenticationEntryPointImpl implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
             throws IOException, ServletException {
 
-        log.error("Error de autenticación: {} - IP: {}", authException.getMessage(), request.getRemoteAddr());
+        // Log sin incluir la IP
+        log.error("Error de autenticación: {}", authException.getMessage());
 
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
+        // Determinar el mensaje de error basado en el atributo de la solicitud (si existe)
+        String errorMessage = (String) request.getAttribute("jwt_error");
+        if (errorMessage == null) {
+            errorMessage = "Acceso no autorizado";
+        }
+
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put("status", HttpStatus.UNAUTHORIZED.value());
         errorResponse.put("error", "Unauthorized");
-        errorResponse.put("message", "Credenciales inválidas");
+        errorResponse.put("message", errorMessage);
         errorResponse.put("path", request.getRequestURI());
 
         new ObjectMapper().writeValue(response.getOutputStream(), errorResponse);

@@ -2,11 +2,10 @@ package com.fiscontrolbackend.fiscontrolbackend.security.jwt;
 
 import com.fiscontrolbackend.fiscontrolbackend.models.user.UserEntity;
 import com.fiscontrolbackend.fiscontrolbackend.repositories.user.UserRepository;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -108,17 +107,61 @@ public class JwtUtils {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
+    /**
+     * Verifica si un token JWT es válido.
+     * Comprueba tanto la firma como la fecha de expiración.
+     *
+     * @param token El token JWT a validar
+     * @return true si el token es válido y no ha expirado, false en caso contrario
+     */
     public Boolean isTokenValid(String token) {
         try {
-            Jwts.parserBuilder()
+            // Verificar firma y parsear el token
+            Jws<Claims> claimsJws = Jwts.parserBuilder()
                     .setSigningKey(getSignatureKey())
                     .build()
-                    .parseClaimsJws(token)
-                    .getBody();
+                    .parseClaimsJws(token);
+
+            // Verificar si el token ha expirado
+            Date expiration = claimsJws.getBody().getExpiration();
+            return !expiration.before(new Date());
+
+        } catch (ExpiredJwtException e) {
+            log.error("Token expirado");
+            return false;
+        } catch (SignatureException e) {
+            log.error("Error en la firma del token");
+            return false;
+        } catch (MalformedJwtException e) {
+            log.error("Token mal formado");
+            return false;
+        } catch (UnsupportedJwtException e) {
+            log.error("Token no soportado");
+            return false;
+        } catch (IllegalArgumentException e) {
+            log.error("Token vacío o nulo");
+            return false;
+        } catch (Exception e) {
+            log.error("Error al validar token: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Verifica si un token JWT ha expirado.
+     *
+     * @param token El token JWT a verificar
+     * @return true si el token ha expirado, false en caso contrario
+     */
+    public Boolean isTokenExpired(String token) {
+        try {
+            Date expiration = extractAllClaims(token).getExpiration();
+            return expiration.before(new Date());
+        } catch (ExpiredJwtException e) {
             return true;
         } catch (Exception e) {
-            log.error("Token inválido, error: ".concat(e.getMessage()));
-            return false;
+            log.error("Error al verificar expiración del token");
+            return true; // Si hay algún error, consideramos que el token ha expirado
         }
     }
 }

@@ -57,14 +57,14 @@ public class PrincipalController {
         try {
             UserEntity user = userRepository.findByUsername(loginRequest.getUsername())
                     .orElseThrow(() -> {
-                        log.error("Intento de login fallido: Usuario no encontrado - Username: {} - IP: {}",
-                                loginRequest.getUsername(), request.getRemoteAddr());
+                        log.error("Intento de login fallido: Usuario no encontrado - Username: {}",
+                                loginRequest.getUsername());
                         return new UsernameNotFoundException("Usuario no encontrado");
                     });
 
             if (!user.getEnabled()) {
-                log.error("Intento de login fallido: Usuario deshabilitado - Username: {} - IP: {}",
-                        loginRequest.getUsername(), request.getRemoteAddr());
+                log.error("Intento de login fallido: Usuario deshabilitado - Username: {}",
+                        loginRequest.getUsername());
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("El usuario está deshabilitado.");
             }
 
@@ -81,18 +81,18 @@ public class PrincipalController {
             response.put("token", jwt);
             response.put("username", authentication.getName());
 
-            log.info("Login exitoso - Username: {} - IP: {}", loginRequest.getUsername(), request.getRemoteAddr());
+            log.info("Login exitoso - Username: {}", loginRequest.getUsername());
             return ResponseEntity.ok(response);
 
         } catch (BadCredentialsException e) {
-            log.error("Intento de login fallido: Credenciales inválidas - Username: {} - IP: {}",
-                    loginRequest.getUsername(), request.getRemoteAddr());
+            log.error("Intento de login fallido: Credenciales inválidas - Username: {}",
+                    loginRequest.getUsername());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales inválidas");
         } catch (UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (Exception e) {
-            log.error("Error en login - Username: {} - IP: {} - Error: {}",
-                    loginRequest.getUsername(), request.getRemoteAddr(), e.getMessage());
+            log.error("Error en login - Username: {} - Error: {}",
+                    loginRequest.getUsername(), e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error de autenticación");
         }
     }
@@ -163,6 +163,22 @@ public class PrincipalController {
         user.setEnabled(false);
         userRepository.save(user);
         return ResponseEntity.ok("Usuario desactivado con éxito");
+    }
+
+    // Método para activar un usuario (eliminación lógica) - Solo para administradores
+    @PatchMapping("/enableUser/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> enableUser(@PathVariable Long id) {
+        UserEntity user = userRepository.findById(id)
+                .orElse(null);
+
+        if (user == null) {
+            return ResponseEntity.badRequest().body("El usuario no existe");
+        }
+
+        user.setEnabled(true);
+        userRepository.save(user);
+        return ResponseEntity.ok("Usuario activado con éxito");
     }
 
     // Método para obtener todos los usuarios - Solo para administradores

@@ -15,12 +15,15 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
@@ -58,20 +61,34 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                                             FilterChain chain,
                                             Authentication authResult) throws IOException, ServletException {
         User user = (User) authResult.getPrincipal();
-        // Usar el método que acepta UserDetails directamente
+
+        // Extraer los roles del usuario
+        List<String> roles = user.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+
+        // Generar el token JWT
         String token = jwtUtils.generateAccessToken(user);
 
+        // Agregar el token al encabezado de la respuesta
         response.addHeader("Authorization", "Bearer " + token);
 
+        // Crear la respuesta JSON
         Map<String, Object> httpResponse = new HashMap<>();
         httpResponse.put("token", token);
         httpResponse.put("message", "Autenticación correcta");
         httpResponse.put("username", user.getUsername());
+        httpResponse.put("roles", roles); // Agregar los roles a la respuesta
 
+        // Enviar la respuesta
         response.getWriter().write(new ObjectMapper().writeValueAsString(httpResponse));
         response.setStatus(HttpStatus.OK.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.getWriter().flush();
+
+        // Registrar el inicio de sesión exitoso sin incluir la IP
+        log.info("Inicio de sesión exitoso - Usuario: {} - Roles: {}",
+                user.getUsername(), roles);
     }
 
     @Override
@@ -79,10 +96,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                                               HttpServletResponse response,
                                               AuthenticationException failed) throws IOException, ServletException {
 
-        log.error("Error de autenticación: {} - Usuario: {} - IP: {}",
-                failed.getMessage(),
-                request.getParameter("username"),
-                request.getRemoteAddr());
+        // Log sin incluir la IP
+        log.error("Error de autenticación: {} - Usuario: desconocido",
+                failed.getMessage());
 
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
