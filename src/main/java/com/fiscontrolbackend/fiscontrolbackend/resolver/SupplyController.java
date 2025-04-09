@@ -20,10 +20,23 @@ public class SupplyController {
 
     // CREATE - Crear un nuevo insumo
     @PostMapping
-    public ResponseEntity<SupplyEntity> createSupply(@RequestBody CreateSupplyDTO supplyDTO) {
+    public ResponseEntity<?> createSupply(@RequestBody CreateSupplyDTO supplyDTO) {
         // Validar que la fecha no sea nula
         if (supplyDTO.getSuppliesDate() == null) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest()
+                    .body("La fecha del insumo no puede ser nula");
+        }
+
+        // Validar que la cantidad no sea 0 o negativa
+        if (supplyDTO.getSuppliesQuantity() == null || supplyDTO.getSuppliesQuantity() <= 0) {
+            return ResponseEntity.badRequest()
+                    .body("La cantidad del insumo debe ser mayor que cero");
+        }
+
+        // Validar que el precio no sea 0 o negativo
+        if (supplyDTO.getSuppliesPrice() == null || supplyDTO.getSuppliesPrice() <= 0) {
+            return ResponseEntity.badRequest()
+                    .body("El precio del insumo debe ser mayor que cero");
         }
 
         SupplyEntity supply = new SupplyEntity();
@@ -38,6 +51,7 @@ public class SupplyController {
         SupplyEntity createdSupply = supplyDetailsService.createSupply(supply);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdSupply);
     }
+
 
     // READ - Obtener todos los insumos
     @GetMapping
