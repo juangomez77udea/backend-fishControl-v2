@@ -19,7 +19,7 @@ public class SupplyDetailsServiceImpl implements SupplyDetailsService {
 
     @Override
     public List<SupplyEntity> getAllSupplies() {
-        return (List<SupplyEntity>) supplyRepository.findAll();
+        return supplyRepository.findAll(); // Ya no necesitamos el cast a List
     }
 
     @Override
@@ -48,23 +48,27 @@ public class SupplyDetailsServiceImpl implements SupplyDetailsService {
 
     @Override
     public List<SupplyEntity> getSuppliesByType(ESupplyType type) {
-        return supplyRepository.findByType(type); // Necesitamos agregar este método en el repository
+        return supplyRepository.findByType(type);
     }
 
     @Override
     public List<SupplyEntity> getSuppliesByStage(String stage) {
-        return supplyRepository.findByStage(stage); // Necesitamos agregar este método en el repository
+        return supplyRepository.findByStage(stage);
     }
 
     @Override
     public Map<ESupplyType, Integer> getInventory() {
-        List<SupplyEntity> supplies = (List<SupplyEntity>) supplyRepository.findAll();
+        List<SupplyEntity> supplies = supplyRepository.findAll();
 
-        // Agrupar insumos por tipo y sumar sus cantidades
         return supplies.stream()
                 .collect(Collectors.groupingBy(
-                        SupplyEntity::getType, // Agrupar por tipo
-                        Collectors.summingInt(SupplyEntity::getSuppliesQuantity) // Sumar las cantidades
+                        SupplyEntity::getType,
+                        Collectors.summingInt(SupplyEntity::getSuppliesQuantity)
                 ));
+    }
+
+    @Override
+    public List<SupplyEntity> getSupplyByName(String name) {
+        return supplyRepository.findBySuppliesName(name);
     }
 }

@@ -23,7 +23,6 @@ public class AuthenticationEntryPointImpl implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
             throws IOException, ServletException {
 
-        // Log sin incluir la IP
         log.error("Error de autenticación: {}", authException.getMessage());
 
         response.setStatus(HttpStatus.UNAUTHORIZED.value());

@@ -2,22 +2,22 @@ package com.fiscontrolbackend.fiscontrolbackend.repositories.main;
 
 import com.fiscontrolbackend.fiscontrolbackend.models.main.ESupplyType;
 import com.fiscontrolbackend.fiscontrolbackend.models.main.SupplyEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
-public interface SupplyRepository extends CrudRepository<SupplyEntity, Long> {
+public interface SupplyRepository extends JpaRepository<SupplyEntity, Long> {
 
-    Optional<SupplyEntity> findBySuppliesName(String suppliesName);
+    // Cambiado para devolver una lista en lugar de Optional
+    List<SupplyEntity> findBySuppliesName(String suppliesName);
 
+    // Actualizado para devolver una lista
     @Query("select s from SupplyEntity s where s.suppliesName = ?1")
-    Optional<SupplyEntity> getName(String suppliesName);
+    List<SupplyEntity> getName(String suppliesName);
 
-    List<SupplyEntity> findByType(ESupplyType type); // Filtrar insumos por tipo
-    List<SupplyEntity> findByStage(String stage);    // Filtrar insumos por etapa
-
+    List<SupplyEntity> findByType(ESupplyType type);
+    List<SupplyEntity> findByStage(String stage);
 }

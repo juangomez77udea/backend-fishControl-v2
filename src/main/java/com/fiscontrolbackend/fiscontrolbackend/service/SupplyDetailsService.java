@@ -16,7 +16,10 @@ public interface SupplyDetailsService {
     void deleteSupply(Long id);
 
     // métodos para consultas específicas
-    List<SupplyEntity> getSuppliesByType(ESupplyType type); // Obtener insumos por tipo
-    List<SupplyEntity> getSuppliesByStage(String stage);    // Obtener insumos por etapa
-    Map<ESupplyType, Integer> getInventory();              // Obtener inventario por tipo
+    List<SupplyEntity> getSuppliesByType(ESupplyType type);
+    List<SupplyEntity> getSuppliesByStage(String stage);
+    Map<ESupplyType, Integer> getInventory();
+
+    // Modificado para devolver una lista
+    List<SupplyEntity> getSupplyByName(String name);
 }

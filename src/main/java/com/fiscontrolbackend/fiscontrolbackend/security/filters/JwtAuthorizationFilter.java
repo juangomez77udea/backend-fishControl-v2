@@ -19,9 +19,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.util.AntPathMatcher;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -33,6 +36,23 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
+
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
+
+    // Lista de rutas públicas que no requieren autenticación
+    private final List<String> publicPaths = Arrays.asList(
+            "/api/login",
+            "/api/health/**",
+            "/api/test/**"
+    );
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        // Verificar si la ruta actual coincide con alguna de las rutas públicas
+        String path = request.getServletPath();
+        return publicPaths.stream()
+                .anyMatch(p -> pathMatcher.match(p, path));
+    }
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
@@ -109,4 +129,3 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         new ObjectMapper().writeValue(response.getOutputStream(), errorResponse);
     }
 }
-

@@ -56,21 +56,19 @@ public class SecurityConfig {
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(authenticationEntryPoint))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/api/login",
-                                "/api/createUser",
-                                "/api/supplies",
-                                "/api/supplies/{id}",
-                                "/api/auth/refreshtoken",
-                                "/api/auth/logout"
-                        ).permitAll() // Permitir estas rutas
+                        // Solo los endpoints de salud y prueba son públicos
+                        .requestMatchers("/api/health/**").permitAll()
+                        .requestMatchers("/api/test/**").permitAll()
+                        // El endpoint de login es manejado por el filtro de autenticación
+                        .requestMatchers("/api/login").permitAll()
+                        .requestMatchers("api/health").permitAll()
+                        // Todas las demás rutas requieren autenticación
                         .anyRequest().authenticated()
                 )
                 .addFilter(jwtAuthenticationFilter)
                 .addFilterBefore(authorizationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
-
 
     @Bean
     PasswordEncoder passwordEncoder() {
@@ -95,4 +93,3 @@ public class SecurityConfig {
         return source;
     }
 }
-

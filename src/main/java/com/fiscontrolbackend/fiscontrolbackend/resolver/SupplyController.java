@@ -1,5 +1,6 @@
 package com.fiscontrolbackend.fiscontrolbackend.resolver;
 
+import com.fiscontrolbackend.fiscontrolbackend.models.main.ESupplyType;
 import com.fiscontrolbackend.fiscontrolbackend.models.main.SupplyEntity;
 import com.fiscontrolbackend.fiscontrolbackend.request.CreateSupplyDTO;
 import com.fiscontrolbackend.fiscontrolbackend.service.SupplyDetailsService;
@@ -46,7 +47,13 @@ public class SupplyController {
         supply.setSuppliesPrice(supplyDTO.getSuppliesPrice());
         supply.setSuppliesDate(supplyDTO.getSuppliesDate());
         supply.setType(supplyDTO.getType());
-        supply.setStage(supplyDTO.getStage());
+
+        // Solo establecer el stage si el tipo es FOOD, de lo contrario establecerlo como null
+        if (supplyDTO.getType() == ESupplyType.FOOD) {
+            supply.setStage(supplyDTO.getStage());
+        } else {
+            supply.setStage(null);
+        }
 
         SupplyEntity createdSupply = supplyDetailsService.createSupply(supply);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdSupply);
@@ -68,9 +75,26 @@ public class SupplyController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    // READ - Obtener insumos por nombre
+    @GetMapping("/name/{name}")
+    public ResponseEntity<?> getSupplyByName(@PathVariable String name) {
+        List<SupplyEntity> supplies = supplyDetailsService.getSupplyByName(name);
+
+        if (supplies.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(supplies);
+    }
+
     // UPDATE - Actualizar un insumo existente
     @PutMapping("/{id}")
     public ResponseEntity<SupplyEntity> updateSupply(@PathVariable Long id, @RequestBody SupplyEntity supply) {
+        // Validar que el stage solo se aplique a insumos de tipo FOOD
+        if (supply.getType() != ESupplyType.FOOD) {
+            supply.setStage(null);
+        }
+
         SupplyEntity updatedSupply = supplyDetailsService.updateSupply(id, supply);
         return updatedSupply != null ?
                 ResponseEntity.ok(updatedSupply) :
